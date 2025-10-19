@@ -69,6 +69,8 @@ export default function AdminPage() {
     );
   }
 
+  const isCreatorAdmin = user?.adminType === 'creator';
+
   const handleGenerateInvite = () => {
     const code = generateInviteCode(user.id);
     setGeneratedCode(code);
@@ -84,6 +86,10 @@ export default function AdminPage() {
   };
 
   const handleGenerateLink = () => {
+    if (user?.adminType !== 'creator') {
+      alert('Apenas o Administrador Criador pode gerar links de convite.');
+      return;
+    }
     const link = generateInviteLink(user.id);
     setGeneratedLink(link.token);
     setCopiedLink(false);
@@ -124,7 +130,7 @@ export default function AdminPage() {
         <div className="container py-6 flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold text-foreground">Painel Administrativo</h1>
-            <p className="text-muted-foreground">Acompanhe o progresso espiritual do grupo</p>
+            <p className="text-muted-foreground">{user?.username} - {isCreatorAdmin ? 'Criador' : 'Líder'}</p>
           </div>
           <Button variant="outline" onClick={() => setCurrentPage('dashboard')}>
             Voltar
@@ -134,45 +140,38 @@ export default function AdminPage() {
 
       {/* Main Content */}
       <main className="container py-8">
-        {/* Invite Generation Section */}
+        {/* Invite Generation Section - Only for Creator Admin */}
+        {isCreatorAdmin ? (
         <Card className="p-8 mb-8 bg-accent/5 border-accent/20">
-          <h2 className="text-2xl font-bold text-foreground mb-6">Gerar Convites de Cadastro</h2>
+          <h2 className="text-2xl font-bold text-foreground mb-6">Gerar Links de Convite</h2>
           <p className="text-muted-foreground mb-6">
-            Use esta seção para gerar códigos de convite exclusivos que permitirão que novos membros se cadastrem na Rede Virtus.
+            Use esta seção para gerar links de convite únicos que permitirão que novos membros se cadastrem na Rede Virtus. Cada link pode ser usado apenas uma vez.
           </p>
 
           <div className="space-y-4">
-            {generatedCode ? (
+            {generatedLink ? (
               <div className="bg-background border-2 border-primary rounded-lg p-6 text-center">
-                <p className="text-muted-foreground mb-3">Código gerado com sucesso:</p>
-                <div className="text-4xl font-bold text-primary tracking-widest mb-6">{generatedCode}</div>
-                <Button onClick={handleCopyCode} className="w-full">
-                  {copiedCode ? '✓ Código Copiado!' : 'Copiar Código'}
+                <p className="text-muted-foreground mb-3">Link de convite gerado com sucesso:</p>
+                <div className="text-sm font-mono bg-muted p-3 rounded mb-6 break-all">{generatedLink}</div>
+                <Button onClick={handleCopyLink} className="w-full">
+                  {copiedLink ? '✓ Link Copiado!' : 'Copiar Link'}
                 </Button>
               </div>
             ) : (
-              <Button onClick={handleGenerateInvite} className="w-full">
-                Gerar Novo Convite
+              <Button onClick={handleGenerateLink} className="w-full">
+                Gerar Novo Link de Convite
               </Button>
-            )}
-
-            {activeInvites.length > 0 && (
-              <div className="mt-6">
-                <h3 className="text-lg font-semibold text-foreground mb-3">Convites Ativos</h3>
-                <div className="space-y-2">
-                  {activeInvites.map((invite) => (
-                    <div key={invite.code} className="flex justify-between items-center bg-background p-3 rounded-lg border border-border">
-                      <span className="font-mono font-bold text-primary">{invite.code}</span>
-                      <span className="text-xs text-muted-foreground">
-                        Criado {new Date(invite.createdAt).toLocaleDateString('pt-BR')}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
             )}
           </div>
         </Card>
+        ) : (
+        <Card className="p-8 mb-8 bg-red-50 border-red-200">
+          <h2 className="text-2xl font-bold text-red-700 mb-4">Acesso Restrito</h2>
+          <p className="text-red-600">
+            Apenas o Administrador Criador pode gerar links de convite. Você é um Administrador Líder e pode gerenciar seus liderados.
+          </p>
+        </Card>
+        )}
 
         {/* Statistics */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">

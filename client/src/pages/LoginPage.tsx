@@ -31,9 +31,10 @@ export default function LoginPage() {
       const user = {
         id: isAdmin ? 'admin' : '1',
         email,
-        username: isAdmin ? 'Administrador' : email.split('@')[0],
+        username: isAdmin ? 'Administrador Criador' : email.split('@')[0],
         commitmentDate: new Date(),
         isAdmin: isAdmin,
+        adminType: isAdmin ? ('creator' as const) : undefined,
         activities: [],
       };
       setUser(user);
@@ -52,6 +53,7 @@ export default function LoginPage() {
       username: fullName.trim(),
       commitmentDate: new Date(),
       isAdmin: false,
+      adminType: undefined,
       activities: [],
     };
     setUser(user);

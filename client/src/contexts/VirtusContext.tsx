@@ -8,6 +8,7 @@ interface User {
   commitmentEndDate?: Date;
   spiritualMaturity?: string;
   isAdmin: boolean;
+  adminType?: 'creator' | 'leader';
   isLeader?: boolean;
   leaderId?: string;
   inviteCode?: string;
