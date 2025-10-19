@@ -217,12 +217,12 @@ export default function AdminPage() {
               </thead>
               <tbody>
                 {MOCK_USERS.map((member) => (
-                  <tr key={member.id} className="border-b border-border hover:bg-muted/50 transition-colors">
-                    <td className="py-4 px-4 text-foreground">{member.username}</td>
+                  <tr key={member.id} className="border-b border-border hover:bg-muted/50 transition-colors cursor-pointer" onClick={() => handleSelectUser(member)}>
+                    <td className="py-4 px-4 text-foreground font-medium">{member.username}</td>
                     <td className="py-4 px-4 text-muted-foreground">{member.email}</td>
                     <td className="py-4 px-4 text-center">
                       <span className="inline-block bg-primary/20 text-primary px-3 py-1 rounded-full text-sm font-semibold">
-                        {member.spiritualMaturity}
+                        {member.spiritualMaturity || 'Não definido'}
                       </span>
                     </td>
                     <td className="py-4 px-4 text-center text-foreground font-semibold">{member.virtuesCount}</td>
@@ -244,6 +244,129 @@ export default function AdminPage() {
             </table>
           </div>
         </Card>
+
+        {/* Member Profile Modal */}
+        {selectedUser && (
+          <Card className="p-8 mt-8 bg-accent/5 border-2 border-accent">
+            <div className="flex justify-between items-center mb-8">
+              <h2 className="text-2xl font-bold text-foreground">Perfil do Membro</h2>
+              <Button variant="ghost" onClick={() => setSelectedUser(null)}>
+                Fechar
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Member Info */}
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-semibold text-foreground mb-4">Informações Pessoais</h3>
+                  <div className="space-y-3 bg-background p-4 rounded-lg">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Nome</p>
+                      <p className="text-foreground font-semibold">{selectedUser.username}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">E-mail</p>
+                      <p className="text-foreground font-semibold">{selectedUser.email}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Data de Cadastro</p>
+                      <p className="text-foreground font-semibold">{new Date(selectedUser.joinDate).toLocaleDateString('pt-BR')}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Último Acesso</p>
+                      <p className="text-foreground font-semibold">{selectedUser.lastAccess}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-semibold text-foreground mb-4">Maturidade Espiritual</h3>
+                  <div className="space-y-3">
+                    <select
+                      value={editingMaturity}
+                      onChange={(e) => setEditingMaturity(e.target.value)}
+                      className="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground"
+                    >
+                      <option value="">Selecione a maturidade</option>
+                      <option value="Iniciante">Iniciante</option>
+                      <option value="Aprendiz">Aprendiz</option>
+                      <option value="Praticante">Praticante</option>
+                      <option value="Dedicado">Dedicado</option>
+                      <option value="Maduro">Maduro</option>
+                      <option value="Sábio">Sábio</option>
+                      <option value="Mestre">Mestre</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Statistics and Activities */}
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-semibold text-foreground mb-4">Estatísticas</h3>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-background p-4 rounded-lg text-center">
+                      <p className="text-2xl font-bold text-primary">{selectedUser.virtuesCount}</p>
+                      <p className="text-xs text-muted-foreground">Virtudes</p>
+                    </div>
+                    <div className="bg-background p-4 rounded-lg text-center">
+                      <p className="text-2xl font-bold text-primary">{selectedUser.readingCount || 0}</p>
+                      <p className="text-xs text-muted-foreground">Leituras</p>
+                    </div>
+                    <div className="bg-background p-4 rounded-lg text-center">
+                      <p className="text-2xl font-bold text-primary">{selectedUser.activitiesCount || 0}</p>
+                      <p className="text-xs text-muted-foreground">Atividades</p>
+                    </div>
+                    <div className="bg-background p-4 rounded-lg text-center">
+                      <p className={`text-2xl font-bold ${selectedUser.isActive ? 'text-green-600' : 'text-gray-600'}`}>
+                        {selectedUser.isActive ? 'Ativo' : 'Inativo'}
+                      </p>
+                      <p className="text-xs text-muted-foreground">Status</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-semibold text-foreground mb-4">Atividades Paroquiais</h3>
+                  <div className="space-y-2 bg-background p-4 rounded-lg max-h-40 overflow-y-auto">
+                    {selectedUser.activities && selectedUser.activities.length > 0 ? (
+                      selectedUser.activities.map((activity: any, idx: number) => (
+                        <div key={idx} className="flex items-center justify-between text-sm">
+                          <span className="text-foreground font-medium">{activity.name}</span>
+                          <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
+                            {activity.day}
+                          </span>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-muted-foreground">Nenhuma atividade registrada</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Date of Completion */}
+            <div className="mt-8 pt-8 border-t border-border">
+              <h3 className="text-lg font-semibold text-foreground mb-4">Data de Encerramento / Promoção a Líder</h3>
+              <div className="flex gap-4">
+                <input
+                  type="date"
+                  value={editingEndDate}
+                  onChange={(e) => setEditingEndDate(e.target.value)}
+                  className="flex-1 px-4 py-2 border border-border rounded-lg bg-background text-foreground"
+                />
+                <Button onClick={handleSaveUserChanges} className="px-6">
+                  Salvar Alterações
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                Deixe em branco para manter indefinido. Quando preenchido, o membro será notificado sobre sua promoção a líder.
+              </p>
+            </div>
+          </Card>
+        )}
       </main>
     </div>
   );
