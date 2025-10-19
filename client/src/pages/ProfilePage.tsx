@@ -7,7 +7,23 @@ export default function ProfilePage() {
   const { user, virtueRecords, setCurrentPage, parishActivities } = useVirtus();
   const [isEditingName, setIsEditingName] = useState(false);
   const [editedName, setEditedName] = useState(user?.username || '');
+  const [selectedActivities, setSelectedActivities] = useState<{[key: string]: number}>(user?.activities?.reduce((acc: any, a: any) => ({ ...acc, [a.activityId]: a.dayOfWeek }), {}) || {});
   const daysOfWeek = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+
+  const handleActivityToggle = (activityId: string, dayOfWeek: number) => {
+    setSelectedActivities((prev) => {
+      if (prev[activityId] === dayOfWeek) {
+        const newActivities = { ...prev };
+        delete newActivities[activityId];
+        return newActivities;
+      }
+      return { ...prev, [activityId]: dayOfWeek };
+    });
+  };
+
+  const uniqueActivities = Array.from(
+    new Map(parishActivities.map((a: any) => [a.name, a])).values()
+  );
 
   if (!user) return null;
 
@@ -24,12 +40,7 @@ export default function ProfilePage() {
       )
     : null;
 
-  // Get user's activities
-  const userActivities = user.activities || [];
-  const activityNames = Array.from(new Set(userActivities.map((a: any) => {
-    const activity = parishActivities.find((pa: any) => pa.id === a.activityId);
-    return activity?.name;
-  })));
+
 
   return (
     <div className="min-h-screen bg-background">
@@ -128,20 +139,48 @@ export default function ProfilePage() {
           {/* Parish Activities */}
           <Card className="p-8">
             <h2 className="text-2xl font-bold text-foreground mb-6">Atividades Paroquiais</h2>
-            {userActivities.length === 0 ? (
-              <p className="text-muted-foreground italic">Você ainda não selecionou nenhuma atividade paroquial.</p>
+            <p className="text-muted-foreground mb-6">Selecione as atividades que você participa:</p>
+            {uniqueActivities.length === 0 ? (
+              <p className="text-muted-foreground italic">Nenhuma atividade paroquial cadastrada ainda.</p>
             ) : (
-              <div className="space-y-3">
-                <p className="text-muted-foreground mb-4">Atividades que você participa:</p>
-                {userActivities.map((activity: any, idx: number) => {
-                  const parishActivity = parishActivities.find((pa: any) => pa.id === activity.activityId);
+              <div className="space-y-4">
+                {uniqueActivities.map((activity: any) => {
+                  const activityDays = parishActivities
+                    .filter((pa: any) => pa.name === activity.name)
+                    .map((pa: any) => pa.dayOfWeek);
+                  const isSelected = selectedActivities[activity.id];
+
                   return (
-                    <div key={idx} className="p-4 bg-muted rounded-lg">
-                      <div className="flex justify-between items-center">
-                        <p className="text-foreground font-semibold">{parishActivity?.name || 'Atividade'}</p>
-                        <span className="text-xs text-muted-foreground bg-background px-2 py-1 rounded">
-                          {daysOfWeek[activity.dayOfWeek]}
-                        </span>
+                    <div key={activity.id} className="p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors">
+                      <div className="space-y-3">
+                        <label className="flex items-center gap-3 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={!!isSelected}
+                            onChange={() => handleActivityToggle(activity.id, activityDays[0] || 0)}
+                            className="w-5 h-5"
+                          />
+                          <span className="text-foreground font-semibold">{activity.name}</span>
+                        </label>
+                        {isSelected && (
+                          <div className="ml-8 space-y-2">
+                            <p className="text-sm text-muted-foreground">Selecione o dia da semana:</p>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                              {activityDays.map((day: number, idx: number) => (
+                                <label key={idx} className="flex items-center gap-2 cursor-pointer">
+                                  <input
+                                    type="radio"
+                                    name={`activity-${activity.id}`}
+                                    checked={selectedActivities[activity.id] === day}
+                                    onChange={() => handleActivityToggle(activity.id, day)}
+                                    className="w-4 h-4"
+                                  />
+                                  <span className="text-sm text-foreground">{daysOfWeek[day]}</span>
+                                </label>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   );
