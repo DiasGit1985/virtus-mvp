@@ -3,33 +3,38 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 
 export default function MuralPage() {
-  const { virtueRecords, setCurrentPage } = useVirtus();
+  const { virtueRecords, setCurrentPage, user } = useVirtus();
 
   // Simular virtudes adicionais para demonstração
   const allVirtues = [
     {
       id: '0',
-      text: 'Alguém praticou a paciência hoje.',
+      text: 'Praticou a paciência hoje.',
+      username: 'Maria Santos',
       time: '2 horas atrás',
     },
     {
       id: '1',
-      text: 'Alguém rezou o terço com devoção.',
+      text: 'Rezou o terço com devoção.',
+      username: 'João Silva',
       time: '4 horas atrás',
     },
     {
       id: '2',
-      text: 'Alguém ajudou o próximo sem esperar reconhecimento.',
+      text: 'Ajudou o próximo sem esperar reconhecimento.',
+      username: 'Ana Costa',
       time: '6 horas atrás',
     },
     {
       id: '3',
-      text: 'Alguém resistiu à tentação digital.',
+      text: 'Resistiu à tentação digital.',
+      username: 'Pedro Oliveira',
       time: '8 horas atrás',
     },
     ...virtueRecords.map((virtue) => ({
       id: virtue.id,
-      text: `Alguém ${virtue.virtueText.toLowerCase()}`,
+      text: virtue.virtueText,
+      username: user?.username || 'Anônimo',
       time: 'Agora',
     })),
   ];
@@ -56,8 +61,7 @@ export default function MuralPage() {
           </Card>
 
           <p className="text-muted-foreground text-center mb-8">
-            Veja os testemunhos anônimos de virtudes de toda a comunidade. Nenhum nome, nenhuma curtida, apenas
-            inspiração pura.
+            Veja os testemunhos de fé de toda a comunidade. Conheça quem está cultivando virtudes e deixe-se inspirar por seus exemplos.
           </p>
 
           {/* Virtues Grid */}
@@ -71,8 +75,11 @@ export default function MuralPage() {
             ) : (
               allVirtues.map((virtue) => (
                 <Card key={virtue.id} className="virtue-card">
-                  <p className="text-foreground not-italic mb-2">{virtue.text}</p>
-                  <p className="text-xs text-muted-foreground">{virtue.time}</p>
+                  <p className="text-foreground not-italic mb-3">{virtue.text}</p>
+                  <div className="border-t border-border pt-3">
+                    <p className="text-sm font-semibold text-primary mb-1">— {virtue.username}</p>
+                    <p className="text-xs text-muted-foreground">{virtue.time}</p>
+                  </div>
                 </Card>
               ))
             )}
