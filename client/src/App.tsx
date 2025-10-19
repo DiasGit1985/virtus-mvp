@@ -13,7 +13,7 @@ import ProfilePage from "./pages/ProfilePage";
 import AdminPage from "./pages/AdminPage";
 import InviteSignupPage from "./pages/InviteSignupPage";
 import SelectActivitiesPage from "./pages/SelectActivitiesPage";
-import BibleReadingPage from "./pages/BibleReadingPage";
+
 
 function Router() {
   const { currentPage, setCurrentPage } = useVirtus();
@@ -30,8 +30,6 @@ function Router() {
         return <DashboardPage />;
       case 'register-virtue':
         return <RegisterVirtuePage />;
-      case 'bible-reading':
-        return <BibleReadingPage />;
       case 'mural':
         return <MuralPage />;
       case 'profile':

@@ -34,9 +34,8 @@ export default function SelectActivitiesPage() {
       email: 'novo@virtus.com',
       username: 'Novo Usuário',
       commitmentDate: new Date(),
-      commitmentLockedUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-      spiritualLevel: 1,
       isAdmin: false,
+      leaderId: 'admin',
       activities: selectedActivities.map((a) => ({
         userId: '1',
         activityId: a.activityId,

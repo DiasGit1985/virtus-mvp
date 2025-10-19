@@ -109,13 +109,6 @@ export default function DashboardPage() {
             </p>
           </Card>
 
-          <Card className="p-6 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setCurrentPage('bible-reading')}>
-            <h3 className="text-2xl font-bold text-foreground mb-2">✦ Leitura da Bíblia</h3>
-            <p className="text-muted-foreground">
-              Leia a Palavra de Deus e registre seu tempo de meditação.
-            </p>
-          </Card>
-
           <Card className="p-6 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setCurrentPage('mural')}>
             <h3 className="text-2xl font-bold text-foreground mb-2">✦ Mural Coletivo</h3>
             <p className="text-muted-foreground">
@@ -140,23 +133,7 @@ export default function DashboardPage() {
           </Card>
         </div>
 
-        {/* Spiritual Level */}
-        <Card className="p-6 mt-8 bg-accent/10">
-          <h3 className="text-lg font-semibold text-foreground mb-4">Seu Nível Espiritual</h3>
-          <div className="flex items-center gap-4">
-            <div className="text-4xl font-bold text-primary">{user?.spiritualLevel}</div>
-            <div className="flex-1">
-              <p className="text-foreground font-semibold">
-                {['Fé', 'Esperança', 'Caridade', 'Fortaleza', 'Temperança', 'Prudência', 'Justiça'][
-                  (user?.spiritualLevel ?? 1) - 1
-                ]}
-              </p>
-              <p className="text-muted-foreground text-sm">
-                Avaliado pelo seu catequista com base em constância e convivência.
-              </p>
-            </div>
-          </div>
-        </Card>
+
       </main>
     </div>
   );

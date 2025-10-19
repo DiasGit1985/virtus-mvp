@@ -8,7 +8,7 @@ const MOCK_USERS = [
     id: '1',
     username: 'maria_santos',
     email: 'maria@example.com',
-    spiritualLevel: 3,
+    spiritualMaturity: 'Avançada',
     lastAccess: '2 horas atrás',
     virtuesCount: 5,
     isActive: true,
@@ -17,7 +17,7 @@ const MOCK_USERS = [
     id: '2',
     username: 'joao_silva',
     email: 'joao@example.com',
-    spiritualLevel: 2,
+    spiritualMaturity: 'Intermediária',
     lastAccess: '1 dia atrás',
     virtuesCount: 3,
     isActive: true,
@@ -26,7 +26,7 @@ const MOCK_USERS = [
     id: '3',
     username: 'ana_costa',
     email: 'ana@example.com',
-    spiritualLevel: 4,
+    spiritualMaturity: 'Avançada',
     lastAccess: '4 horas atrás',
     virtuesCount: 8,
     isActive: true,
@@ -35,14 +35,12 @@ const MOCK_USERS = [
     id: '4',
     username: 'pedro_oliveira',
     email: 'pedro@example.com',
-    spiritualLevel: 1,
+    spiritualMaturity: 'Iniciante',
     lastAccess: '3 dias atrás',
     virtuesCount: 1,
     isActive: false,
   },
 ];
-
-const SPIRITUAL_LEVELS = ['Fé', 'Esperança', 'Caridade', 'Fortaleza', 'Temperança', 'Prudência', 'Justiça'];
 
 export default function AdminPage() {
   const { user, setCurrentPage, generateInviteCode, inviteCodes } = useVirtus();
@@ -157,9 +155,9 @@ export default function AdminPage() {
             </p>
           </Card>
           <Card className="p-6 text-center">
-            <p className="text-muted-foreground text-sm mb-2">Nível Médio</p>
+            <p className="text-muted-foreground text-sm mb-2">Membros em Avaliação</p>
             <p className="text-4xl font-bold text-primary">
-              {(MOCK_USERS.reduce((sum, u) => sum + u.spiritualLevel, 0) / MOCK_USERS.length).toFixed(1)}
+              {MOCK_USERS.filter((u) => u.isActive).length}
             </p>
           </Card>
         </div>
@@ -174,7 +172,7 @@ export default function AdminPage() {
                 <tr className="border-b border-border">
                   <th className="text-left py-4 px-4 text-foreground font-semibold">Nome</th>
                   <th className="text-left py-4 px-4 text-foreground font-semibold">E-mail</th>
-                  <th className="text-center py-4 px-4 text-foreground font-semibold">Nível</th>
+                  <th className="text-center py-4 px-4 text-foreground font-semibold">Maturidade Espiritual</th>
                   <th className="text-center py-4 px-4 text-foreground font-semibold">Virtudes</th>
                   <th className="text-left py-4 px-4 text-foreground font-semibold">Último Acesso</th>
                   <th className="text-center py-4 px-4 text-foreground font-semibold">Status</th>
@@ -187,7 +185,7 @@ export default function AdminPage() {
                     <td className="py-4 px-4 text-muted-foreground">{member.email}</td>
                     <td className="py-4 px-4 text-center">
                       <span className="inline-block bg-primary/20 text-primary px-3 py-1 rounded-full text-sm font-semibold">
-                        {SPIRITUAL_LEVELS[member.spiritualLevel - 1]}
+                        {member.spiritualMaturity}
                       </span>
                     </td>
                     <td className="py-4 px-4 text-center text-foreground font-semibold">{member.virtuesCount}</td>

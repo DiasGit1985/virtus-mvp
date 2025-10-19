@@ -5,11 +5,30 @@ interface User {
   email: string;
   username: string;
   commitmentDate: Date;
-  commitmentLockedUntil: Date;
-  spiritualLevel: number;
+  commitmentEndDate?: Date;
+  spiritualMaturity?: string;
   isAdmin: boolean;
+  isLeader?: boolean;
+  leaderId?: string;
   inviteCode?: string;
   activities: UserActivityParticipation[];
+}
+
+interface SpiritualLeader {
+  id: string;
+  name: string;
+  email: string;
+  createdAt: Date;
+  createdBy: string;
+}
+
+interface PrivateMessage {
+  id: string;
+  fromId: string;
+  toId: string;
+  content: string;
+  createdAt: Date;
+  read: boolean;
 }
 
 interface VirtueRecord {

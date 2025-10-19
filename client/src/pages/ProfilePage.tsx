@@ -2,25 +2,16 @@ import { useVirtus } from '@/contexts/VirtusContext';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 
-const SPIRITUAL_LEVELS = [
-  { level: 1, name: 'Fé', description: 'Início da jornada espiritual' },
-  { level: 2, name: 'Esperança', description: 'Confiança em Deus' },
-  { level: 3, name: 'Caridade', description: 'Amor ao próximo' },
-  { level: 4, name: 'Fortaleza', description: 'Força espiritual' },
-  { level: 5, name: 'Temperança', description: 'Domínio de si mesmo' },
-  { level: 6, name: 'Prudência', description: 'Sabedoria' },
-  { level: 7, name: 'Justiça', description: 'Retidão' },
-];
-
 export default function ProfilePage() {
   const { user, virtueRecords, setCurrentPage } = useVirtus();
 
   if (!user) return null;
 
-  const currentLevel = SPIRITUAL_LEVELS[user.spiritualLevel - 1];
-  const daysUntilUnlock = Math.ceil(
-    (new Date(user.commitmentLockedUntil).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
-  );
+  const daysUntilPromotion = user.commitmentEndDate
+    ? Math.ceil(
+        (new Date(user.commitmentEndDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
+      )
+    : null;
 
   return (
     <div className="min-h-screen bg-background">
@@ -42,46 +33,28 @@ export default function ProfilePage() {
             <h2 className="text-2xl font-bold text-foreground mb-6">Informações Pessoais</h2>
             <div className="space-y-4">
               <div className="flex justify-between items-center pb-4 border-b border-border">
+                <span className="text-muted-foreground">Nome:</span>
+                <span className="text-foreground font-semibold">{user.username}</span>
+              </div>
+              <div className="flex justify-between items-center pb-4 border-b border-border">
                 <span className="text-muted-foreground">E-mail:</span>
                 <span className="text-foreground font-semibold">{user.email}</span>
               </div>
               <div className="flex justify-between items-center pb-4 border-b border-border">
-                <span className="text-muted-foreground">Nome de Usuário:</span>
-                <span className="text-foreground font-semibold">{user.username}</span>
-              </div>
-              <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">Data de Adesão:</span>
                 <span className="text-foreground font-semibold">
                   {new Date(user.commitmentDate).toLocaleDateString('pt-BR')}
                 </span>
               </div>
-            </div>
-          </Card>
-
-          {/* Spiritual Level */}
-          <Card className="p-8 bg-primary/10 border-2 border-primary">
-            <h2 className="text-2xl font-bold text-foreground mb-6">Seu Nível Espiritual</h2>
-            <div className="flex items-center gap-8 mb-8">
-              <div className="text-center">
-                <div className="text-6xl font-bold text-primary mb-2">{user.spiritualLevel}</div>
-                <p className="text-lg font-semibold text-foreground">{currentLevel.name}</p>
-              </div>
-              <div className="flex-1">
-                <p className="text-foreground mb-4">{currentLevel.description}</p>
-                <div className="w-full bg-muted rounded-full h-3">
-                  <div
-                    className="bg-primary h-3 rounded-full transition-all"
-                    style={{ width: `${(user.spiritualLevel / 7) * 100}%` }}
-                  />
+              {user.leaderId && (
+                <div className="flex justify-between items-center">
+                  <span className="text-muted-foreground">Seu Líder Espiritual:</span>
+                  <span className="text-foreground font-semibold text-primary">
+                    {user.leaderId === 'admin' ? 'Administrador' : 'Líder Espiritual'}
+                  </span>
                 </div>
-                <p className="text-xs text-muted-foreground mt-2">
-                  Nível {user.spiritualLevel} de 7
-                </p>
-              </div>
+              )}
             </div>
-            <p className="text-sm text-muted-foreground italic">
-              Seu nível é avaliado pelo seu catequista com base em constância, convivência e crescimento espiritual.
-            </p>
           </Card>
 
           {/* Commitment Status */}
@@ -92,20 +65,29 @@ export default function ProfilePage() {
                 <span className="text-muted-foreground">Status:</span>
                 <span className="text-foreground font-semibold text-green-600">Ativo</span>
               </div>
-              <div className="flex justify-between items-center pb-4 border-b border-border">
-                <span className="text-muted-foreground">Conta Bloqueada Até:</span>
-                <span className="text-foreground font-semibold">
-                  {new Date(user.commitmentLockedUntil).toLocaleDateString('pt-BR')}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Dias Restantes:</span>
-                <span className="text-foreground font-semibold">{daysUntilUnlock} dias</span>
-              </div>
+              {user.commitmentEndDate ? (
+                <>
+                  <div className="flex justify-between items-center pb-4 border-b border-border">
+                    <span className="text-muted-foreground">Data de Encerramento:</span>
+                    <span className="text-foreground font-semibold">
+                      {new Date(user.commitmentEndDate).toLocaleDateString('pt-BR')}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground">Dias Restantes:</span>
+                    <span className={`text-foreground font-semibold ${daysUntilPromotion && daysUntilPromotion <= 7 ? 'text-orange-600' : ''}`}>
+                      {daysUntilPromotion && daysUntilPromotion > 0 ? `${daysUntilPromotion} dias` : 'Encerrado'}
+                    </span>
+                  </div>
+                </>
+              ) : (
+                <p className="text-muted-foreground italic">
+                  Seu termo de compromisso está em avaliação. Seu líder espiritual determinará a data de encerramento.
+                </p>
+              )}
             </div>
             <p className="text-sm text-muted-foreground italic mt-6">
-              Sua conta está protegida por 30 dias após a aceitação do Termo de Compromisso do Silêncio Digital. Isso
-              garante seu compromisso com a jornada espiritual.
+              Seu compromisso com a jornada espiritual é acompanhado por seu líder espiritual, que avaliará seu progresso e determinará quando você estará pronto para novas responsabilidades.
             </p>
           </Card>
 
@@ -129,26 +111,15 @@ export default function ProfilePage() {
             )}
           </Card>
 
-          {/* Spiritual Levels Guide */}
-          <Card className="p-8 bg-muted">
-            <h2 className="text-2xl font-bold text-foreground mb-6">Guia dos Níveis Espirituais</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {SPIRITUAL_LEVELS.map((level) => (
-                <div
-                  key={level.level}
-                  className={`p-4 rounded-lg ${
-                    level.level === user.spiritualLevel
-                      ? 'bg-primary/20 border-2 border-primary'
-                      : 'bg-background border border-border'
-                  }`}
-                >
-                  <p className="font-semibold text-foreground">
-                    {level.level}. {level.name}
-                  </p>
-                  <p className="text-sm text-muted-foreground">{level.description}</p>
-                </div>
-              ))}
-            </div>
+          {/* Spiritual Journey */}
+          <Card className="p-8 bg-accent/10">
+            <h2 className="text-2xl font-bold text-foreground mb-6">Sua Jornada Espiritual</h2>
+            <p className="text-foreground leading-relaxed">
+              Você está em uma jornada de crescimento espiritual acompanhado por seu líder espiritual. Cada virtude registrada, cada leitura realizada e cada participação nas atividades paroquiais são passos importantes nessa caminhada.
+            </p>
+            <p className="text-foreground leading-relaxed mt-4">
+              Seu líder avalia seu progresso e, quando julgar apropriado, poderá promovê-lo a Líder Espiritual para guiar outros que desejam passar pela mesma experiência que você está vivenciando.
+            </p>
           </Card>
         </div>
       </main>

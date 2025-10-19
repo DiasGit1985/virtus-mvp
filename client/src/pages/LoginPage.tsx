@@ -33,8 +33,6 @@ export default function LoginPage() {
         email,
         username: isAdmin ? 'Administrador' : email.split('@')[0],
         commitmentDate: new Date(),
-        commitmentLockedUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-        spiritualLevel: isAdmin ? 7 : 1,
         isAdmin: isAdmin,
         activities: [],
       };
@@ -53,8 +51,6 @@ export default function LoginPage() {
       email,
       username: fullName.trim(),
       commitmentDate: new Date(),
-      commitmentLockedUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-      spiritualLevel: 1,
       isAdmin: false,
       activities: [],
     };
