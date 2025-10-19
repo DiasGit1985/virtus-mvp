@@ -43,7 +43,7 @@ const MOCK_USERS = [
 ];
 
 export default function AdminPage() {
-  const { user, setCurrentPage, generateInviteCode, generateInviteLink, inviteCodes, pendingUsers, approvePendingUser, rejectPendingUser, allUsers, updateUserMaturity, updateUserEndDate } = useVirtus();
+  const { user, setCurrentPage, generateInviteCode, generateInviteLink, inviteCodes, pendingUsers, approvePendingUser, rejectPendingUser, allUsers, updateUserMaturity, updateUserEndDate, parishActivities, addParishActivity, deleteParishActivity } = useVirtus();
   const [generatedCode, setGeneratedCode] = useState<string | null>(null);
   const [copiedCode, setCopiedCode] = useState(false);
   const [generatedLink, setGeneratedLink] = useState<string | null>(null);
@@ -51,7 +51,10 @@ export default function AdminPage() {
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [editingMaturity, setEditingMaturity] = useState('');
   const [editingEndDate, setEditingEndDate] = useState('');
-  const [tab, setTab] = useState<'convites' | 'membros' | 'pendentes'>('convites');
+  const [tab, setTab] = useState<'convites' | 'membros' | 'pendentes' | 'atividades'>('convites');
+  const [newActivityName, setNewActivityName] = useState('');
+  const [selectedDays, setSelectedDays] = useState<number[]>([]);
+  const [editingActivityId, setEditingActivityId] = useState<string | null>(null);
 
   if (!user?.isAdmin) {
     return (
@@ -70,6 +73,27 @@ export default function AdminPage() {
   }
 
   const isCreatorAdmin = user?.adminType === 'creator';
+  const daysOfWeek = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+
+  const handleAddActivity = () => {
+    if (!newActivityName.trim() || selectedDays.length === 0) {
+      alert('Por favor, preencha o nome da atividade e selecione pelo menos um dia.');
+      return;
+    }
+    addParishActivity(newActivityName, selectedDays);
+    setNewActivityName('');
+    setSelectedDays([]);
+  };
+
+  const handleToggleDay = (day: number) => {
+    setSelectedDays((prev) =>
+      prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
+    );
+  };
+
+  const uniqueActivities = Array.from(
+    new Map(parishActivities.map((a: any) => [a.name, a])).values()
+  );
 
   const handleGenerateInvite = () => {
     const code = generateInviteCode(user.id);
@@ -364,6 +388,86 @@ export default function AdminPage() {
               <p className="text-xs text-muted-foreground mt-2">
                 Deixe em branco para manter indefinido. Quando preenchido, o membro será notificado sobre sua promoção a líder.
               </p>
+            </div>
+          </Card>
+        )}
+
+        {/* Parish Activities Management - Only for Creator Admin */}
+        {isCreatorAdmin && (
+          <Card className="p-8 mt-8 bg-accent/5 border-accent/20">
+            <h2 className="text-2xl font-bold text-foreground mb-6">Gerenciar Atividades Paroquiais</h2>
+            <p className="text-muted-foreground mb-6">
+              Cadastre as atividades e compromissos paroquiais que os liderados poderão selecionar para registrar seu compromisso espiritual.
+            </p>
+
+            {/* Add New Activity */}
+            <div className="bg-background p-6 rounded-lg mb-8">
+              <h3 className="text-lg font-semibold text-foreground mb-4">Cadastrar Nova Atividade</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">Nome da Atividade</label>
+                  <input
+                    type="text"
+                    value={newActivityName}
+                    onChange={(e) => setNewActivityName(e.target.value)}
+                    placeholder="Ex: Missa Dominical, Grupo de Oração, Catequese"
+                    className="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-3">Dias da Semana</label>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {daysOfWeek.map((day, idx) => (
+                      <label key={idx} className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={selectedDays.includes(idx)}
+                          onChange={() => handleToggleDay(idx)}
+                          className="w-4 h-4"
+                        />
+                        <span className="text-sm text-foreground">{day}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <Button onClick={handleAddActivity} className="w-full">
+                  Cadastrar Atividade
+                </Button>
+              </div>
+            </div>
+
+            {/* List of Activities */}
+            <div>
+              <h3 className="text-lg font-semibold text-foreground mb-4">Atividades Cadastradas</h3>
+              {uniqueActivities.length > 0 ? (
+                <div className="space-y-3">
+                  {uniqueActivities.map((activity: any) => {
+                    const activityDays = parishActivities
+                      .filter((a) => a.name === activity.name)
+                      .map((a) => daysOfWeek[a.dayOfWeek])
+                      .join(', ');
+                    return (
+                      <div key={activity.id} className="flex justify-between items-center bg-background p-4 rounded-lg border border-border">
+                        <div>
+                          <p className="font-semibold text-foreground">{activity.name}</p>
+                          <p className="text-xs text-muted-foreground">{activityDays}</p>
+                        </div>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => deleteParishActivity(activity.id)}
+                        >
+                          Deletar
+                        </Button>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-muted-foreground text-center py-8">Nenhuma atividade cadastrada ainda.</p>
+              )}
             </div>
           </Card>
         )}

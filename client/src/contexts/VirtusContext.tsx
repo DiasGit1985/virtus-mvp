@@ -123,6 +123,9 @@ interface VirtusContextType {
   setCurrentPage: (page: string) => void;
   parishActivities: ParishActivity[];
   setParishActivities: (activities: ParishActivity[]) => void;
+  addParishActivity: (name: string, daysOfWeek: number[]) => void;
+  updateParishActivity: (id: string, name: string, daysOfWeek: number[]) => void;
+  deleteParishActivity: (id: string) => void;
   inviteCodes: InviteCode[];
   generateInviteCode: (adminId: string) => string;
   validateInviteCode: (code: string) => boolean;
@@ -269,6 +272,37 @@ export function VirtusProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('virtus_all_users', JSON.stringify(updatedUsers));
   };
 
+  const addParishActivity = (name: string, daysOfWeek: number[]) => {
+    const newActivities = daysOfWeek.map((day) => ({
+      id: Date.now().toString() + day,
+      name,
+      dayOfWeek: day,
+      createdBy: user?.id || 'admin',
+    }));
+    const updated = [...parishActivities, ...newActivities];
+    setParishActivities(updated);
+    localStorage.setItem('virtus_parish_activities', JSON.stringify(updated));
+  };
+
+  const updateParishActivity = (id: string, name: string, daysOfWeek: number[]) => {
+    const filtered = parishActivities.filter((a) => a.id !== id);
+    const newActivities = daysOfWeek.map((day) => ({
+      id: id + day,
+      name,
+      dayOfWeek: day,
+      createdBy: user?.id || 'admin',
+    }));
+    const updated = [...filtered, ...newActivities];
+    setParishActivities(updated);
+    localStorage.setItem('virtus_parish_activities', JSON.stringify(updated));
+  };
+
+  const deleteParishActivity = (id: string) => {
+    const updated = parishActivities.filter((a) => !a.id.startsWith(id));
+    setParishActivities(updated);
+    localStorage.setItem('virtus_parish_activities', JSON.stringify(updated));
+  };
+
   useEffect(() => {
     const savedUser = localStorage.getItem('virtus_user');
     const savedTime = localStorage.getItem('virtus_time_today');
@@ -347,6 +381,9 @@ export function VirtusProvider({ children }: { children: React.ReactNode }) {
         setCurrentPage,
         parishActivities,
         setParishActivities,
+        addParishActivity,
+        updateParishActivity,
+        deleteParishActivity,
         inviteCodes,
         generateInviteCode,
         validateInviteCode,
