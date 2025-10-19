@@ -42,10 +42,14 @@ export default function RegisterVirtuePage() {
   const [readingType, setReadingType] = useState<'bible' | 'other'>('bible');
   const [selectedBook, setSelectedBook] = useState('');
   const [customBook, setCustomBook] = useState('');
+  const [customBooks, setCustomBooks] = useState<string[]>([]);
   const [chapter, setChapter] = useState('1');
   const [isReading, setIsReading] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [showPublishDialog, setShowPublishDialog] = useState(false);
+  const [isFinished, setIsFinished] = useState(false);
+  const [showAddBook, setShowAddBook] = useState(false);
+  const [newBookName, setNewBookName] = useState('');
 
   useEffect(() => {
     if (!isReading) return;
@@ -99,14 +103,25 @@ export default function RegisterVirtuePage() {
     setShowPublishDialog(true);
   };
 
+  const handleAddCustomBook = () => {
+    if (!newBookName.trim()) {
+      alert('Por favor, insira o nome do livro.');
+      return;
+    }
+    setCustomBooks([...customBooks, newBookName.trim()]);
+    setNewBookName('');
+    setShowAddBook(false);
+  };
+
   const handlePublishReading = () => {
     if (!user) return;
 
     const book = readingType === 'bible' ? selectedBook : customBook;
+    const statusText = isFinished ? '(finalizado)' : '(em andamento)';
     const virtueRecord = {
       id: Date.now().toString(),
       userId: user.id,
-      virtueText: `${user.username} fez ${elapsedSeconds > 60 ? Math.floor(elapsedSeconds / 60) : elapsedSeconds} ${elapsedSeconds > 60 ? 'minutos' : 'segundos'} de leitura do livro ${book} ${chapter}.`,
+      virtueText: `${user.username} fez ${elapsedSeconds > 60 ? Math.floor(elapsedSeconds / 60) : elapsedSeconds} ${elapsedSeconds > 60 ? 'minutos' : 'segundos'} de leitura do livro ${book} ${chapter} ${statusText}.`,
       createdAt: new Date(),
       isAnonymous: false,
       type: 'bible_reading' as const,
@@ -114,6 +129,7 @@ export default function RegisterVirtuePage() {
 
     addVirtueRecord(virtueRecord);
     setShowPublishDialog(false);
+    setIsFinished(false);
     setCurrentPage('dashboard');
   };
 
@@ -143,6 +159,15 @@ export default function RegisterVirtuePage() {
           </p>
 
           <div className="space-y-4">
+            <label className="flex items-center gap-2 cursor-pointer justify-center">
+              <input
+                type="checkbox"
+                checked={isFinished}
+                onChange={(e) => setIsFinished(e.target.checked)}
+                className="w-4 h-4"
+              />
+              <span className="text-sm text-foreground">Finalizei este livro</span>
+            </label>
             <Button onClick={handlePublishReading} className="w-full">
               Publicar no Mural
             </Button>
@@ -150,6 +175,7 @@ export default function RegisterVirtuePage() {
               variant="outline"
               onClick={() => {
                 setShowPublishDialog(false);
+                setIsFinished(false);
                 setCurrentPage('dashboard');
               }}
               className="w-full"
@@ -265,30 +291,73 @@ export default function RegisterVirtuePage() {
 
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-2">
-                    {readingType === 'bible' ? 'Livro da Bíblia' : 'Nome do Livro'}
-                  </label>
-                  {readingType === 'bible' ? (
+                  {readingType === 'bible' ? 'Livro da Bíblia' : 'Nome do Livro'}
+                </label>
+                {readingType === 'bible' ? (
+                  <select
+                    value={selectedBook}
+                    onChange={(e) => setSelectedBook(e.target.value)}
+                    className="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground"
+                  >
+                    <option value="">Selecione um livro</option>
+                    {BIBLE_BOOKS.map((book) => (
+                      <option key={book} value={book}>
+                        {book}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <div className="space-y-3">
                     <select
-                      value={selectedBook}
-                      onChange={(e) => setSelectedBook(e.target.value)}
+                      value={customBook}
+                      onChange={(e) => setCustomBook(e.target.value)}
                       className="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground"
                     >
-                      <option value="">Selecione um livro</option>
-                      {BIBLE_BOOKS.map((book) => (
+                      <option value="">Selecione um livro ou cadastre um novo</option>
+                      {customBooks.map((book) => (
                         <option key={book} value={book}>
                           {book}
                         </option>
                       ))}
                     </select>
-                  ) : (
-                    <Input
-                      type="text"
-                      value={customBook}
-                      onChange={(e) => setCustomBook(e.target.value)}
-                      placeholder="Digite o nome do livro"
-                      className="w-full"
-                    />
-                  )}
+                    {showAddBook ? (
+                      <div className="flex gap-2">
+                        <Input
+                          type="text"
+                          value={newBookName}
+                          onChange={(e) => setNewBookName(e.target.value)}
+                          placeholder="Nome do livro"
+                          className="flex-1"
+                        />
+                        <Button
+                          type="button"
+                          onClick={handleAddCustomBook}
+                          variant="default"
+                          className="px-4"
+                        >
+                          Adicionar
+                        </Button>
+                        <Button
+                          type="button"
+                          onClick={() => setShowAddBook(false)}
+                          variant="outline"
+                          className="px-4"
+                        >
+                          Cancelar
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button
+                        type="button"
+                        onClick={() => setShowAddBook(true)}
+                        variant="outline"
+                        className="w-full"
+                      >
+                        + Cadastrar Novo Livro
+                      </Button>
+                    )}
+                  </div>
+                )}
                 </div>
 
                 <div>
@@ -303,6 +372,18 @@ export default function RegisterVirtuePage() {
                     max="200"
                     className="w-full"
                   />
+                </div>
+
+                <div>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={isFinished}
+                      onChange={(e) => setIsFinished(e.target.checked)}
+                      className="w-4 h-4"
+                    />
+                    <span className="text-sm text-foreground">Já finalizei este livro</span>
+                  </label>
                 </div>
 
                 <Button type="submit" className="w-full">
