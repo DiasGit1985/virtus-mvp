@@ -24,15 +24,18 @@ export default function LoginPage() {
       }
       setShowManifesto(true);
     } else {
+      // Verificar se é login de admin
+      const isAdmin = email === 'admin@virtus.com' && password === 'admin123';
+      
       // Simular login
       const user = {
-        id: '1',
+        id: isAdmin ? 'admin' : '1',
         email,
-        username: email.split('@')[0],
+        username: isAdmin ? 'Administrador' : email.split('@')[0],
         commitmentDate: new Date(),
         commitmentLockedUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-        spiritualLevel: 1,
-        isAdmin: false,
+        spiritualLevel: isAdmin ? 7 : 1,
+        isAdmin: isAdmin,
         activities: [],
       };
       setUser(user);
@@ -237,6 +240,14 @@ export default function LoginPage() {
             "O silêncio também é uma oração."
           </p>
         </div>
+
+        {!isSignUp && !showManifesto && (
+          <div className="mt-6 p-3 bg-blue-50 border border-blue-200 rounded-lg text-center">
+            <p className="text-xs text-blue-700">
+              <strong>Acesso Admin:</strong> Use <code className="bg-blue-100 px-1 rounded">admin@virtus.com</code> / <code className="bg-blue-100 px-1 rounded">admin123</code>
+            </p>
+          </div>
+        )}
       </Card>
     </div>
   );
