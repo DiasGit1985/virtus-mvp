@@ -231,6 +231,18 @@ export default function LoginPage() {
           )}
         </div>
 
+        {!isSignUp && !showManifesto && (
+          <div className="mt-4">
+            <Button
+              variant="outline"
+              onClick={() => setCurrentPage('invite-link-signup')}
+              className="w-full text-sm"
+            >
+              Cadastrar com Link de Convite
+            </Button>
+          </div>
+        )}
+
         <div className="mt-8 p-4 bg-accent/10 rounded-lg text-center">
           <p className="text-sm text-muted-foreground italic">
             "O silêncio também é uma oração."
