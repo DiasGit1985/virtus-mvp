@@ -43,9 +43,15 @@ const MOCK_USERS = [
 ];
 
 export default function AdminPage() {
-  const { user, setCurrentPage, generateInviteCode, inviteCodes } = useVirtus();
+  const { user, setCurrentPage, generateInviteCode, generateInviteLink, inviteCodes, pendingUsers, approvePendingUser, rejectPendingUser, allUsers, updateUserMaturity, updateUserEndDate } = useVirtus();
   const [generatedCode, setGeneratedCode] = useState<string | null>(null);
   const [copiedCode, setCopiedCode] = useState(false);
+  const [generatedLink, setGeneratedLink] = useState<string | null>(null);
+  const [copiedLink, setCopiedLink] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [editingMaturity, setEditingMaturity] = useState('');
+  const [editingEndDate, setEditingEndDate] = useState('');
+  const [tab, setTab] = useState<'convites' | 'membros' | 'pendentes'>('convites');
 
   if (!user?.isAdmin) {
     return (
@@ -77,7 +83,39 @@ export default function AdminPage() {
     }
   };
 
+  const handleGenerateLink = () => {
+    const link = generateInviteLink(user.id);
+    setGeneratedLink(link.token);
+    setCopiedLink(false);
+  };
+
+  const handleCopyLink = () => {
+    if (generatedLink) {
+      const fullLink = `${window.location.origin}?invite=${generatedLink}`;
+      navigator.clipboard.writeText(fullLink);
+      setCopiedLink(true);
+      setTimeout(() => setCopiedLink(false), 2000);
+    }
+  };
+
+  const handleSelectUser = (u: any) => {
+    setSelectedUser(u);
+    setEditingMaturity(u.spiritualMaturity || '');
+    setEditingEndDate(u.commitmentEndDate ? new Date(u.commitmentEndDate).toISOString().split('T')[0] : '');
+  };
+
+  const handleSaveUserChanges = () => {
+    if (selectedUser && editingMaturity) {
+      updateUserMaturity(selectedUser.id, editingMaturity);
+      if (editingEndDate) {
+        updateUserEndDate(selectedUser.id, new Date(editingEndDate));
+      }
+      setSelectedUser(null);
+    }
+  };
+
   const activeInvites = inviteCodes.filter((inv) => inv.isActive && !inv.usedBy);
+  const pendingCount = pendingUsers.filter((u) => u.status === 'pending').length;
 
   return (
     <div className="min-h-screen bg-background">

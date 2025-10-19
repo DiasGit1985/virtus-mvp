@@ -12,8 +12,8 @@ import MuralPage from "./pages/MuralPage";
 import ProfilePage from "./pages/ProfilePage";
 import AdminPage from "./pages/AdminPage";
 import InviteSignupPage from "./pages/InviteSignupPage";
+import InviteLinkSignupPage from "./pages/InviteLinkSignupPage";
 import SelectActivitiesPage from "./pages/SelectActivitiesPage";
-
 
 function Router() {
   const { currentPage, setCurrentPage } = useVirtus();
@@ -24,6 +24,8 @@ function Router() {
         return <LoginPage />;
       case 'invite-signup':
         return <InviteSignupPage />;
+      case 'invite-link-signup':
+        return <InviteLinkSignupPage />;
       case 'activities':
         return <SelectActivitiesPage />;
       case 'dashboard':

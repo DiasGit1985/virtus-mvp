@@ -73,6 +73,29 @@ interface InviteCode {
   isActive: boolean;
 }
 
+interface InviteLink {
+  id: string;
+  token: string;
+  createdBy: string;
+  createdAt: Date;
+  usedBy?: string;
+  usedAt?: Date;
+  isActive: boolean;
+  expiresAt: Date;
+}
+
+interface PendingUser {
+  id: string;
+  email: string;
+  username: string;
+  commitmentDate: Date;
+  leaderId: string;
+  activities: UserActivityParticipation[];
+  status: 'pending' | 'approved' | 'rejected';
+  createdAt: Date;
+  approvedAt?: Date;
+}
+
 interface DailyPulse {
   id: string;
   pulseDate: Date;
@@ -104,6 +127,16 @@ interface VirtusContextType {
   validateInviteCode: (code: string) => boolean;
   currentReadingSession?: BibleReading;
   setCurrentReadingSession: (session: BibleReading | undefined) => void;
+  inviteLinks: InviteLink[];
+  generateInviteLink: (adminId: string) => InviteLink;
+  validateInviteLink: (token: string) => boolean;
+  pendingUsers: PendingUser[];
+  addPendingUser: (user: PendingUser) => void;
+  approvePendingUser: (userId: string) => void;
+  rejectPendingUser: (userId: string) => void;
+  allUsers: User[];
+  updateUserMaturity: (userId: string, maturity: string) => void;
+  updateUserEndDate: (userId: string, endDate: Date) => void;
 }
 
 const VirtusContext = createContext<VirtusContextType | undefined>(undefined);
@@ -120,6 +153,9 @@ export function VirtusProvider({ children }: { children: React.ReactNode }) {
   const [parishActivities, setParishActivities] = useState<ParishActivity[]>([]);
   const [inviteCodes, setInviteCodes] = useState<InviteCode[]>([]);
   const [currentReadingSession, setCurrentReadingSession] = useState<BibleReading | undefined>(undefined);
+  const [inviteLinks, setInviteLinks] = useState<InviteLink[]>([]);
+  const [pendingUsers, setPendingUsers] = useState<PendingUser[]>([]);
+  const [allUsers, setAllUsers] = useState<User[]>([]);
 
   const addVirtueRecord = (virtue: VirtueRecord) => {
     const updated = [...virtueRecords, virtue];
@@ -152,6 +188,84 @@ export function VirtusProvider({ children }: { children: React.ReactNode }) {
       (inv) => inv.code === code && inv.isActive && !inv.usedBy
     );
     return !!invite;
+  };
+
+  const generateInviteLink = (adminId: string): InviteLink => {
+    const token = Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2);
+    const newLink: InviteLink = {
+      id: Date.now().toString(),
+      token,
+      createdBy: adminId,
+      createdAt: new Date(),
+      isActive: true,
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    };
+    const updated = [...inviteLinks, newLink];
+    setInviteLinks(updated);
+    localStorage.setItem('virtus_invite_links', JSON.stringify(updated));
+    return newLink;
+  };
+
+  const validateInviteLink = (token: string): boolean => {
+    const link = inviteLinks.find(
+      (l) => l.token === token && l.isActive && !l.usedBy && new Date(l.expiresAt) > new Date()
+    );
+    return !!link;
+  };
+
+  const addPendingUser = (newUser: PendingUser) => {
+    const updated = [...pendingUsers, newUser];
+    setPendingUsers(updated);
+    localStorage.setItem('virtus_pending_users', JSON.stringify(updated));
+  };
+
+  const approvePendingUser = (userId: string) => {
+    const pending = pendingUsers.find((u) => u.id === userId);
+    if (!pending) return;
+
+    const newUser: User = {
+      id: pending.id,
+      email: pending.email,
+      username: pending.username,
+      commitmentDate: pending.commitmentDate,
+      isAdmin: false,
+      leaderId: pending.leaderId,
+      activities: pending.activities,
+    };
+
+    const updatedUsers = [...allUsers, newUser];
+    setAllUsers(updatedUsers);
+    localStorage.setItem('virtus_all_users', JSON.stringify(updatedUsers));
+
+    const updatedPending = pendingUsers.map((u) =>
+      u.id === userId ? { ...u, status: 'approved' as const, approvedAt: new Date() } : u
+    );
+    setPendingUsers(updatedPending);
+    localStorage.setItem('virtus_pending_users', JSON.stringify(updatedPending));
+  };
+
+  const rejectPendingUser = (userId: string) => {
+    const updatedPending = pendingUsers.map((u) =>
+      u.id === userId ? { ...u, status: 'rejected' as const } : u
+    );
+    setPendingUsers(updatedPending);
+    localStorage.setItem('virtus_pending_users', JSON.stringify(updatedPending));
+  };
+
+  const updateUserMaturity = (userId: string, maturity: string) => {
+    const updatedUsers = allUsers.map((u) =>
+      u.id === userId ? { ...u, spiritualMaturity: maturity } : u
+    );
+    setAllUsers(updatedUsers);
+    localStorage.setItem('virtus_all_users', JSON.stringify(updatedUsers));
+  };
+
+  const updateUserEndDate = (userId: string, endDate: Date) => {
+    const updatedUsers = allUsers.map((u) =>
+      u.id === userId ? { ...u, commitmentEndDate: endDate } : u
+    );
+    setAllUsers(updatedUsers);
+    localStorage.setItem('virtus_all_users', JSON.stringify(updatedUsers));
   };
 
   useEffect(() => {
@@ -237,6 +351,16 @@ export function VirtusProvider({ children }: { children: React.ReactNode }) {
         validateInviteCode,
         currentReadingSession,
         setCurrentReadingSession,
+        inviteLinks,
+        generateInviteLink,
+        validateInviteLink,
+        pendingUsers,
+        addPendingUser,
+        approvePendingUser,
+        rejectPendingUser,
+        allUsers,
+        updateUserMaturity,
+        updateUserEndDate,
       }}
     >
       {children}
