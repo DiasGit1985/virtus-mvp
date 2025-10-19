@@ -4,17 +4,37 @@ import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import Home from "./pages/Home";
+import { VirtusProvider, useVirtus } from "./contexts/VirtusContext";
+import LoginPage from "./pages/LoginPage";
+import DashboardPage from "./pages/DashboardPage";
+import RegisterVirtuePage from "./pages/RegisterVirtuePage";
+import MuralPage from "./pages/MuralPage";
+import ProfilePage from "./pages/ProfilePage";
+import AdminPage from "./pages/AdminPage";
 
 function Router() {
-  return (
-    <Switch>
-      <Route path={"/"} component={Home} />
-      <Route path={"/404"} component={NotFound} />
-      {/* Final fallback route */}
-      <Route component={NotFound} />
-    </Switch>
-  );
+  const { currentPage, setCurrentPage } = useVirtus();
+
+  const renderPage = () => {
+    switch (currentPage) {
+      case 'login':
+        return <LoginPage />;
+      case 'dashboard':
+        return <DashboardPage />;
+      case 'register-virtue':
+        return <RegisterVirtuePage />;
+      case 'mural':
+        return <MuralPage />;
+      case 'profile':
+        return <ProfilePage />;
+      case 'admin':
+        return <AdminPage />;
+      default:
+        return <LoginPage />;
+    }
+  };
+
+  return <div>{renderPage()}</div>;
 }
 
 // NOTE: About Theme
@@ -25,13 +45,12 @@ function Router() {
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider
-        defaultTheme="light"
-        // switchable
-      >
+      <ThemeProvider defaultTheme="light">
         <TooltipProvider>
           <Toaster />
-          <Router />
+          <VirtusProvider>
+            <Router />
+          </VirtusProvider>
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>
