@@ -1,17 +1,35 @@
 import { useVirtus } from '@/contexts/VirtusContext';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { useState } from 'react';
 
 export default function ProfilePage() {
-  const { user, virtueRecords, setCurrentPage } = useVirtus();
+  const { user, virtueRecords, setCurrentPage, parishActivities } = useVirtus();
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editedName, setEditedName] = useState(user?.username || '');
+  const daysOfWeek = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 
   if (!user) return null;
+
+  const handleSaveName = () => {
+    if (editedName.trim()) {
+      // In a real app, this would update the user in the database
+      setIsEditingName(false);
+    }
+  };
 
   const daysUntilPromotion = user.commitmentEndDate
     ? Math.ceil(
         (new Date(user.commitmentEndDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
       )
     : null;
+
+  // Get user's activities
+  const userActivities = user.activities || [];
+  const activityNames = Array.from(new Set(userActivities.map((a: any) => {
+    const activity = parishActivities.find((pa: any) => pa.id === a.activityId);
+    return activity?.name;
+  })));
 
   return (
     <div className="min-h-screen bg-background">
@@ -34,7 +52,23 @@ export default function ProfilePage() {
             <div className="space-y-4">
               <div className="flex justify-between items-center pb-4 border-b border-border">
                 <span className="text-muted-foreground">Nome:</span>
-                <span className="text-foreground font-semibold">{user.username}</span>
+                {isEditingName ? (
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={editedName}
+                      onChange={(e) => setEditedName(e.target.value)}
+                      className="px-3 py-1 border border-border rounded bg-background text-foreground"
+                    />
+                    <Button size="sm" onClick={handleSaveName}>Salvar</Button>
+                    <Button size="sm" variant="outline" onClick={() => setIsEditingName(false)}>Cancelar</Button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <span className="text-foreground font-semibold">{user.username}</span>
+                    <Button size="sm" variant="ghost" onClick={() => setIsEditingName(true)}>Editar</Button>
+                  </div>
+                )}
               </div>
               <div className="flex justify-between items-center pb-4 border-b border-border">
                 <span className="text-muted-foreground">E-mail:</span>
@@ -89,6 +123,31 @@ export default function ProfilePage() {
             <p className="text-sm text-muted-foreground italic mt-6">
               Seu compromisso com a jornada espiritual é acompanhado por seu líder espiritual, que avaliará seu progresso e determinará quando você estará pronto para novas responsabilidades.
             </p>
+          </Card>
+
+          {/* Parish Activities */}
+          <Card className="p-8">
+            <h2 className="text-2xl font-bold text-foreground mb-6">Atividades Paroquiais</h2>
+            {userActivities.length === 0 ? (
+              <p className="text-muted-foreground italic">Você ainda não selecionou nenhuma atividade paroquial.</p>
+            ) : (
+              <div className="space-y-3">
+                <p className="text-muted-foreground mb-4">Atividades que você participa:</p>
+                {userActivities.map((activity: any, idx: number) => {
+                  const parishActivity = parishActivities.find((pa: any) => pa.id === activity.activityId);
+                  return (
+                    <div key={idx} className="p-4 bg-muted rounded-lg">
+                      <div className="flex justify-between items-center">
+                        <p className="text-foreground font-semibold">{parishActivity?.name || 'Atividade'}</p>
+                        <span className="text-xs text-muted-foreground bg-background px-2 py-1 rounded">
+                          {daysOfWeek[activity.dayOfWeek]}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </Card>
 
           {/* Virtue Statistics */}
