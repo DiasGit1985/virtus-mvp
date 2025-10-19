@@ -43,7 +43,7 @@ export default function RegisterVirtuePage() {
   const [selectedBook, setSelectedBook] = useState('');
   const [customBook, setCustomBook] = useState('');
   const [customBooks, setCustomBooks] = useState<string[]>([]);
-  const [chapter, setChapter] = useState('1');
+
   const [isReading, setIsReading] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [showPublishDialog, setShowPublishDialog] = useState(false);
@@ -90,8 +90,8 @@ export default function RegisterVirtuePage() {
 
   const handleStartReading = () => {
     const book = readingType === 'bible' ? selectedBook : customBook;
-    if (!book || !chapter) {
-      alert('Por favor, selecione um livro e capítulo.');
+    if (!book) {
+      alert('Por favor, selecione um livro.');
       return;
     }
     setIsReading(true);
@@ -121,7 +121,7 @@ export default function RegisterVirtuePage() {
     const virtueRecord = {
       id: Date.now().toString(),
       userId: user.id,
-      virtueText: `${user.username} fez ${elapsedSeconds > 60 ? Math.floor(elapsedSeconds / 60) : elapsedSeconds} ${elapsedSeconds > 60 ? 'minutos' : 'segundos'} de leitura do livro ${book} ${chapter} ${statusText}.`,
+      virtueText: `${user.username} fez ${elapsedSeconds > 60 ? Math.floor(elapsedSeconds / 60) : elapsedSeconds} ${elapsedSeconds > 60 ? 'minutos' : 'segundos'} de leitura do livro ${book} ${statusText}.`,
       createdAt: new Date(),
       isAnonymous: false,
       type: 'bible_reading' as const,
@@ -360,19 +360,7 @@ export default function RegisterVirtuePage() {
                 )}
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    Capítulo / Página
-                  </label>
-                  <Input
-                    type="number"
-                    value={chapter}
-                    onChange={(e) => setChapter(e.target.value)}
-                    min="1"
-                    max="200"
-                    className="w-full"
-                  />
-                </div>
+
 
                 <div>
                   <label className="flex items-center gap-2 cursor-pointer">
@@ -395,7 +383,7 @@ export default function RegisterVirtuePage() {
                 <div>
                   <p className="text-muted-foreground mb-2">Lendo agora</p>
                   <h2 className="text-2xl font-bold text-foreground">
-                    {readingType === 'bible' ? selectedBook : customBook} {chapter}
+                    {readingType === 'bible' ? selectedBook : customBook}
                   </h2>
                 </div>
 
