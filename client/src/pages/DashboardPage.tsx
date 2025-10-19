@@ -86,16 +86,11 @@ export default function DashboardPage() {
 
       {/* Main Content */}
       <main className="container py-8">
-        {/* Timer Section */}
-        <Card className="p-8 mb-8 text-center bg-card">
-          <h2 className="text-xl text-muted-foreground mb-4">Tempo Disponível Hoje</h2>
-          <div className="timer-display mb-6">{formatTime(remainingTime)}</div>
-          <p className="text-muted-foreground">
-            {remainingTime > 0
-              ? `${Math.floor(remainingTime / 60)} minutos e ${remainingTime % 60} segundos restantes`
-              : 'Tempo expirado'}
-          </p>
-        </Card>
+        {/* Timer Section - Discreto */}
+        <div className="mb-8 text-right">
+          <p className="text-sm text-muted-foreground mb-1">Tempo disponível</p>
+          <div className="text-3xl font-bold text-primary">{formatTime(remainingTime)}</div>
+        </div>
 
         {/* Daily Pulse */}
         {dailyPulse && (
