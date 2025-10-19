@@ -8,6 +8,7 @@ export default function LoginPage() {
   const { setUser, setIsLoggedIn, setCurrentPage } = useVirtus();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
   const [showManifesto, setShowManifesto] = useState(false);
   const [acceptedManifesto, setAcceptedManifesto] = useState(false);
@@ -17,6 +18,10 @@ export default function LoginPage() {
     if (!email || !password) return;
 
     if (isSignUp) {
+      if (!fullName.trim()) {
+        alert('Por favor, preencha seu nome completo.');
+        return;
+      }
       setShowManifesto(true);
     } else {
       // Simular login
@@ -42,7 +47,7 @@ export default function LoginPage() {
     const user = {
       id: '1',
       email,
-      username: email.split('@')[0],
+      username: fullName.trim(),
       commitmentDate: new Date(),
       commitmentLockedUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
       spiritualLevel: 1,
@@ -151,6 +156,21 @@ export default function LoginPage() {
         </div>
 
         <form onSubmit={handleLogin} className="space-y-6">
+          {isSignUp && (
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Nome Completo
+              </label>
+              <Input
+                type="text"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                placeholder="Seu nome completo"
+                className="w-full"
+              />
+            </div>
+          )}
+
           <div>
             <label className="block text-sm font-medium text-foreground mb-2">
               E-mail
@@ -192,6 +212,7 @@ export default function LoginPage() {
               setIsSignUp(!isSignUp);
               setEmail('');
               setPassword('');
+              setFullName('');
             }}
             className="w-full"
           >
