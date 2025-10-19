@@ -8,6 +8,8 @@ interface User {
   commitmentLockedUntil: Date;
   spiritualLevel: number;
   isAdmin: boolean;
+  inviteCode?: string;
+  activities: UserActivityParticipation[];
 }
 
 interface VirtueRecord {
@@ -16,6 +18,40 @@ interface VirtueRecord {
   virtueText: string;
   createdAt: Date;
   isAnonymous: boolean;
+  type: 'virtue' | 'bible_reading';
+}
+
+interface BibleReading {
+  id: string;
+  userId: string;
+  book: string;
+  chapter: number;
+  startTime: Date;
+  endTime?: Date;
+  durationSeconds: number;
+  publishedToMural: boolean;
+}
+
+interface ParishActivity {
+  id: string;
+  name: string;
+  dayOfWeek: number;
+  createdBy: string;
+}
+
+interface UserActivityParticipation {
+  userId: string;
+  activityId: string;
+  dayOfWeek: number;
+}
+
+interface InviteCode {
+  code: string;
+  createdBy: string;
+  createdAt: Date;
+  usedBy?: string;
+  usedAt?: Date;
+  isActive: boolean;
 }
 
 interface DailyPulse {
@@ -36,10 +72,19 @@ interface VirtusContextType {
   setIsTimeBlocked: (value: boolean) => void;
   virtueRecords: VirtueRecord[];
   addVirtueRecord: (virtue: VirtueRecord) => void;
+  bibleReadings: BibleReading[];
+  addBibleReading: (reading: BibleReading) => void;
   dailyPulse: DailyPulse | null;
   setDailyPulse: (pulse: DailyPulse | null) => void;
   currentPage: string;
   setCurrentPage: (page: string) => void;
+  parishActivities: ParishActivity[];
+  setParishActivities: (activities: ParishActivity[]) => void;
+  inviteCodes: InviteCode[];
+  generateInviteCode: (adminId: string) => string;
+  validateInviteCode: (code: string) => boolean;
+  currentReadingSession?: BibleReading;
+  setCurrentReadingSession: (session: BibleReading | undefined) => void;
 }
 
 const VirtusContext = createContext<VirtusContextType | undefined>(undefined);
@@ -50,14 +95,53 @@ export function VirtusProvider({ children }: { children: React.ReactNode }) {
   const [timeSpentToday, setTimeSpentToday] = useState(0);
   const [isTimeBlocked, setIsTimeBlocked] = useState(false);
   const [virtueRecords, setVirtueRecords] = useState<VirtueRecord[]>([]);
+  const [bibleReadings, setBibleReadings] = useState<BibleReading[]>([]);
   const [dailyPulse, setDailyPulse] = useState<DailyPulse | null>(null);
   const [currentPage, setCurrentPage] = useState('login');
+  const [parishActivities, setParishActivities] = useState<ParishActivity[]>([]);
+  const [inviteCodes, setInviteCodes] = useState<InviteCode[]>([]);
+  const [currentReadingSession, setCurrentReadingSession] = useState<BibleReading | undefined>(undefined);
 
-  // Simular carregamento de dados ao inicializar
+  const addVirtueRecord = (virtue: VirtueRecord) => {
+    const updated = [...virtueRecords, virtue];
+    setVirtueRecords(updated);
+    localStorage.setItem('virtus_virtues', JSON.stringify(updated));
+  };
+
+  const addBibleReading = (reading: BibleReading) => {
+    const updated = [...bibleReadings, reading];
+    setBibleReadings(updated);
+    localStorage.setItem('virtus_bible_readings', JSON.stringify(updated));
+  };
+
+  const generateInviteCode = (adminId: string): string => {
+    const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const newInvite: InviteCode = {
+      code,
+      createdBy: adminId,
+      createdAt: new Date(),
+      isActive: true,
+    };
+    const updated = [...inviteCodes, newInvite];
+    setInviteCodes(updated);
+    localStorage.setItem('virtus_invite_codes', JSON.stringify(updated));
+    return code;
+  };
+
+  const validateInviteCode = (code: string): boolean => {
+    const invite = inviteCodes.find(
+      (inv) => inv.code === code && inv.isActive && !inv.usedBy
+    );
+    return !!invite;
+  };
+
   useEffect(() => {
     const savedUser = localStorage.getItem('virtus_user');
     const savedTime = localStorage.getItem('virtus_time_today');
     const savedVirtues = localStorage.getItem('virtus_virtues');
+    const savedReadings = localStorage.getItem('virtus_bible_readings');
+    const savedActivities = localStorage.getItem('virtus_parish_activities');
+    const savedInvites = localStorage.getItem('virtus_invite_codes');
 
     if (savedUser) {
       setUser(JSON.parse(savedUser));
@@ -70,7 +154,7 @@ export function VirtusProvider({ children }: { children: React.ReactNode }) {
       const today = new Date().toDateString();
       if (timeData.date === today) {
         setTimeSpentToday(timeData.seconds);
-        setIsTimeBlocked(timeData.seconds >= 1800); // 30 minutos = 1800 segundos
+        setIsTimeBlocked(timeData.seconds >= 1800);
       }
     }
 
@@ -78,7 +162,27 @@ export function VirtusProvider({ children }: { children: React.ReactNode }) {
       setVirtueRecords(JSON.parse(savedVirtues));
     }
 
-    // Simular carregamento do "Pulso" diário
+    if (savedReadings) {
+      setBibleReadings(JSON.parse(savedReadings));
+    }
+
+    if (savedActivities) {
+      setParishActivities(JSON.parse(savedActivities));
+    } else {
+      const defaultActivities: ParishActivity[] = [
+        { id: '1', name: 'Missa Dominical', dayOfWeek: 0, createdBy: 'admin' },
+        { id: '2', name: 'Catequese', dayOfWeek: 3, createdBy: 'admin' },
+        { id: '3', name: 'Grupo de Oração', dayOfWeek: 5, createdBy: 'admin' },
+        { id: '4', name: 'Confissão', dayOfWeek: 6, createdBy: 'admin' },
+      ];
+      setParishActivities(defaultActivities);
+      localStorage.setItem('virtus_parish_activities', JSON.stringify(defaultActivities));
+    }
+
+    if (savedInvites) {
+      setInviteCodes(JSON.parse(savedInvites));
+    }
+
     const todayPulse: DailyPulse = {
       id: '1',
       pulseDate: new Date(),
@@ -87,12 +191,6 @@ export function VirtusProvider({ children }: { children: React.ReactNode }) {
     };
     setDailyPulse(todayPulse);
   }, []);
-
-  const addVirtueRecord = (virtue: VirtueRecord) => {
-    const updated = [...virtueRecords, virtue];
-    setVirtueRecords(updated);
-    localStorage.setItem('virtus_virtues', JSON.stringify(updated));
-  };
 
   return (
     <VirtusContext.Provider
@@ -107,10 +205,19 @@ export function VirtusProvider({ children }: { children: React.ReactNode }) {
         setIsTimeBlocked,
         virtueRecords,
         addVirtueRecord,
+        bibleReadings,
+        addBibleReading,
         dailyPulse,
         setDailyPulse,
         currentPage,
         setCurrentPage,
+        parishActivities,
+        setParishActivities,
+        inviteCodes,
+        generateInviteCode,
+        validateInviteCode,
+        currentReadingSession,
+        setCurrentReadingSession,
       }}
     >
       {children}

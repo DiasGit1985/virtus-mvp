@@ -11,6 +11,9 @@ import RegisterVirtuePage from "./pages/RegisterVirtuePage";
 import MuralPage from "./pages/MuralPage";
 import ProfilePage from "./pages/ProfilePage";
 import AdminPage from "./pages/AdminPage";
+import InviteSignupPage from "./pages/InviteSignupPage";
+import SelectActivitiesPage from "./pages/SelectActivitiesPage";
+import BibleReadingPage from "./pages/BibleReadingPage";
 
 function Router() {
   const { currentPage, setCurrentPage } = useVirtus();
@@ -19,10 +22,16 @@ function Router() {
     switch (currentPage) {
       case 'login':
         return <LoginPage />;
+      case 'invite-signup':
+        return <InviteSignupPage />;
+      case 'activities':
+        return <SelectActivitiesPage />;
       case 'dashboard':
         return <DashboardPage />;
       case 'register-virtue':
         return <RegisterVirtuePage />;
+      case 'bible-reading':
+        return <BibleReadingPage />;
       case 'mural':
         return <MuralPage />;
       case 'profile':
@@ -36,11 +45,6 @@ function Router() {
 
   return <div>{renderPage()}</div>;
 }
-
-// NOTE: About Theme
-// - First choose a default theme according to your design style (dark or light bg), than change color palette in index.css
-//   to keep consistent foreground/background color across components
-// - If you want to make theme switchable, pass `switchable` ThemeProvider and use `useTheme` hook
 
 function App() {
   return (
@@ -58,3 +62,4 @@ function App() {
 }
 
 export default App;
+

@@ -1,8 +1,8 @@
+import { useState } from 'react';
 import { useVirtus } from '@/contexts/VirtusContext';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 
-// Simular dados de usuários para o painel admin
 const MOCK_USERS = [
   {
     id: '1',
@@ -45,7 +45,9 @@ const MOCK_USERS = [
 const SPIRITUAL_LEVELS = ['Fé', 'Esperança', 'Caridade', 'Fortaleza', 'Temperança', 'Prudência', 'Justiça'];
 
 export default function AdminPage() {
-  const { user, setCurrentPage } = useVirtus();
+  const { user, setCurrentPage, generateInviteCode, inviteCodes } = useVirtus();
+  const [generatedCode, setGeneratedCode] = useState<string | null>(null);
+  const [copiedCode, setCopiedCode] = useState(false);
 
   if (!user?.isAdmin) {
     return (
@@ -62,6 +64,22 @@ export default function AdminPage() {
       </div>
     );
   }
+
+  const handleGenerateInvite = () => {
+    const code = generateInviteCode(user.id);
+    setGeneratedCode(code);
+    setCopiedCode(false);
+  };
+
+  const handleCopyCode = () => {
+    if (generatedCode) {
+      navigator.clipboard.writeText(generatedCode);
+      setCopiedCode(true);
+      setTimeout(() => setCopiedCode(false), 2000);
+    }
+  };
+
+  const activeInvites = inviteCodes.filter((inv) => inv.isActive && !inv.usedBy);
 
   return (
     <div className="min-h-screen bg-background">
@@ -80,6 +98,46 @@ export default function AdminPage() {
 
       {/* Main Content */}
       <main className="container py-8">
+        {/* Invite Generation Section */}
+        <Card className="p-8 mb-8 bg-accent/5 border-accent/20">
+          <h2 className="text-2xl font-bold text-foreground mb-6">Gerar Convites de Cadastro</h2>
+          <p className="text-muted-foreground mb-6">
+            Use esta seção para gerar códigos de convite exclusivos que permitirão que novos membros se cadastrem na Rede Virtus.
+          </p>
+
+          <div className="space-y-4">
+            {generatedCode ? (
+              <div className="bg-background border-2 border-primary rounded-lg p-6 text-center">
+                <p className="text-muted-foreground mb-3">Código gerado com sucesso:</p>
+                <div className="text-4xl font-bold text-primary tracking-widest mb-6">{generatedCode}</div>
+                <Button onClick={handleCopyCode} className="w-full">
+                  {copiedCode ? '✓ Código Copiado!' : 'Copiar Código'}
+                </Button>
+              </div>
+            ) : (
+              <Button onClick={handleGenerateInvite} className="w-full">
+                Gerar Novo Convite
+              </Button>
+            )}
+
+            {activeInvites.length > 0 && (
+              <div className="mt-6">
+                <h3 className="text-lg font-semibold text-foreground mb-3">Convites Ativos</h3>
+                <div className="space-y-2">
+                  {activeInvites.map((invite) => (
+                    <div key={invite.code} className="flex justify-between items-center bg-background p-3 rounded-lg border border-border">
+                      <span className="font-mono font-bold text-primary">{invite.code}</span>
+                      <span className="text-xs text-muted-foreground">
+                        Criado {new Date(invite.createdAt).toLocaleDateString('pt-BR')}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </Card>
+
         {/* Statistics */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card className="p-6 text-center">
@@ -149,25 +207,6 @@ export default function AdminPage() {
                 ))}
               </tbody>
             </table>
-          </div>
-        </Card>
-
-        {/* Actions */}
-        <Card className="p-8 mt-8 bg-accent/10">
-          <h2 className="text-2xl font-bold text-foreground mb-6">Ações Administrativas</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Button variant="outline" className="w-full">
-              Enviar Mensagem Pulso
-            </Button>
-            <Button variant="outline" className="w-full">
-              Gerar Relatório
-            </Button>
-            <Button variant="outline" className="w-full">
-              Promover a Guia
-            </Button>
-            <Button variant="outline" className="w-full">
-              Avaliar Progresso
-            </Button>
           </div>
         </Card>
       </main>

@@ -109,10 +109,17 @@ export default function DashboardPage() {
             </p>
           </Card>
 
+          <Card className="p-6 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setCurrentPage('bible-reading')}>
+            <h3 className="text-2xl font-bold text-foreground mb-2">✦ Leitura da Bíblia</h3>
+            <p className="text-muted-foreground">
+              Leia a Palavra de Deus e registre seu tempo de meditação.
+            </p>
+          </Card>
+
           <Card className="p-6 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setCurrentPage('mural')}>
             <h3 className="text-2xl font-bold text-foreground mb-2">✦ Mural Coletivo</h3>
             <p className="text-muted-foreground">
-              Veja os testemunhos anônimos de virtudes de toda a comunidade.
+              Veja os testemunhos identificados de virtudes de toda a comunidade.
             </p>
           </Card>
 

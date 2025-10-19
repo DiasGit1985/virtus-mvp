@@ -32,6 +32,7 @@ export default function RegisterVirtuePage() {
       virtueText: virtueText.trim(),
       createdAt: new Date(),
       isAnonymous: true,
+      type: 'virtue' as const,
     };
 
     addVirtueRecord(newVirtue);

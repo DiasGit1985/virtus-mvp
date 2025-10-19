@@ -33,6 +33,7 @@ export default function LoginPage() {
         commitmentLockedUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
         spiritualLevel: 1,
         isAdmin: false,
+        activities: [],
       };
       setUser(user);
       setIsLoggedIn(true);
@@ -52,6 +53,7 @@ export default function LoginPage() {
       commitmentLockedUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
       spiritualLevel: 1,
       isAdmin: false,
+      activities: [],
     };
     setUser(user);
     setIsLoggedIn(true);
@@ -202,7 +204,7 @@ export default function LoginPage() {
           </Button>
         </form>
 
-        <div className="mt-6 text-center">
+        <div className="mt-6 text-center space-y-3">
           <p className="text-muted-foreground mb-4">
             {isSignUp ? 'Já tem uma conta?' : 'Não tem uma conta?'}
           </p>
@@ -218,6 +220,16 @@ export default function LoginPage() {
           >
             {isSignUp ? 'Entrar' : 'Criar Conta'}
           </Button>
+
+          {!isSignUp && (
+            <Button
+              variant="ghost"
+              onClick={() => setCurrentPage('invite-signup')}
+              className="w-full text-sm"
+            >
+              Cadastrar com Código de Convite
+            </Button>
+          )}
         </div>
 
         <div className="mt-8 p-4 bg-accent/10 rounded-lg text-center">
