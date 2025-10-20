@@ -145,10 +145,12 @@ export default function ProfilePage() {
             ) : (
               <div className="space-y-4">
                 {uniqueActivities.map((activity: any) => {
-                  const activityDays = parishActivities
-                    .filter((pa: any) => pa.name === activity.name)
-                    .map((pa: any) => pa.dayOfWeek);
-                  const isSelected = selectedActivities[activity.id];
+                  const activityDays = Array.from(new Set(
+                    parishActivities
+                      .filter((pa: any) => pa.name === activity.name)
+                      .map((pa: any) => pa.dayOfWeek)
+                  )).sort((a, b) => a - b);
+                  const isSelected = selectedActivities[activity.id] !== undefined;
 
                   return (
                     <div key={activity.id} className="p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors">
@@ -156,23 +158,31 @@ export default function ProfilePage() {
                         <label className="flex items-center gap-3 cursor-pointer">
                           <input
                             type="checkbox"
-                            checked={!!isSelected}
-                            onChange={() => handleActivityToggle(activity.id, activityDays[0] || 0)}
+                            checked={isSelected}
+                            onChange={() => {
+                              if (isSelected) {
+                                const newActivities = { ...selectedActivities };
+                                delete newActivities[activity.id];
+                                setSelectedActivities(newActivities);
+                              } else {
+                                setSelectedActivities({ ...selectedActivities, [activity.id]: activityDays[0] || 0 });
+                              }
+                            }}
                             className="w-5 h-5"
                           />
                           <span className="text-foreground font-semibold">{activity.name}</span>
                         </label>
-                        {isSelected && (
+                        {isSelected && activityDays.length > 0 && (
                           <div className="ml-8 space-y-3">
-                            <p className="text-sm text-muted-foreground font-medium">Escolha o dia em que você participa:</p>
+                            <p className="text-sm text-muted-foreground font-medium">Escolha o dia em que voce participa:</p>
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                              {activityDays.map((day: number, idx: number) => (
-                                <label key={idx} className="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-background transition-colors">
+                              {activityDays.map((day: number) => (
+                                <label key={day} className="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-background transition-colors">
                                   <input
                                     type="radio"
                                     name={`activity-${activity.id}`}
                                     checked={selectedActivities[activity.id] === day}
-                                    onChange={() => handleActivityToggle(activity.id, day)}
+                                    onChange={() => setSelectedActivities({ ...selectedActivities, [activity.id]: day })}
                                     className="w-4 h-4"
                                   />
                                   <span className="text-sm text-foreground">{daysOfWeek[day]}</span>
