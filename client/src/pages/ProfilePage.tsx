@@ -139,7 +139,7 @@ export default function ProfilePage() {
           {/* Parish Activities */}
           <Card className="p-8">
             <h2 className="text-2xl font-bold text-foreground mb-6">Atividades Paroquiais</h2>
-            <p className="text-muted-foreground mb-6">Selecione as atividades que você participa:</p>
+            <p className="text-muted-foreground mb-6">Selecione as atividades que você participa e o dia em que ocorrem:</p>
             {uniqueActivities.length === 0 ? (
               <p className="text-muted-foreground italic">Nenhuma atividade paroquial cadastrada ainda.</p>
             ) : (
@@ -163,11 +163,11 @@ export default function ProfilePage() {
                           <span className="text-foreground font-semibold">{activity.name}</span>
                         </label>
                         {isSelected && (
-                          <div className="ml-8 space-y-2">
-                            <p className="text-sm text-muted-foreground">Selecione o dia da semana:</p>
+                          <div className="ml-8 space-y-3">
+                            <p className="text-sm text-muted-foreground font-medium">Escolha o dia em que você participa:</p>
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                               {activityDays.map((day: number, idx: number) => (
-                                <label key={idx} className="flex items-center gap-2 cursor-pointer">
+                                <label key={idx} className="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-background transition-colors">
                                   <input
                                     type="radio"
                                     name={`activity-${activity.id}`}
