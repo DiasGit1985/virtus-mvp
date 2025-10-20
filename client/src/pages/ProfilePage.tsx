@@ -172,20 +172,20 @@ export default function ProfilePage() {
                           />
                           <span className="text-foreground font-semibold">{activity.name}</span>
                         </label>
-                        {isSelected && activityDays.length > 0 && (
+                        {isSelected && (
                           <div className="ml-8 space-y-3">
                             <p className="text-sm text-muted-foreground font-medium">Escolha o dia em que voce participa:</p>
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                              {activityDays.map((day: number) => (
-                                <label key={day} className="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-background transition-colors">
+                              {daysOfWeek.map((day: string, dayIndex: number) => (
+                                <label key={dayIndex} className="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-background transition-colors">
                                   <input
                                     type="radio"
                                     name={`activity-${activity.id}`}
-                                    checked={selectedActivities[activity.id] === day}
-                                    onChange={() => setSelectedActivities({ ...selectedActivities, [activity.id]: day })}
+                                    checked={selectedActivities[activity.id] === dayIndex}
+                                    onChange={() => setSelectedActivities({ ...selectedActivities, [activity.id]: dayIndex })}
                                     className="w-4 h-4"
                                   />
-                                  <span className="text-sm text-foreground">{daysOfWeek[day]}</span>
+                                  <span className="text-sm text-foreground">{day}</span>
                                 </label>
                               ))}
                             </div>
