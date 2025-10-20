@@ -16,6 +16,7 @@ import InviteLinkSignupPage from "./pages/InviteLinkSignupPage";
 import SelectActivitiesPage from "./pages/SelectActivitiesPage";
 
 function Router() {
+  // make sure to consider if you need authentication for certain routes
   const { currentPage, setCurrentPage } = useVirtus();
 
   const renderPage = () => {
