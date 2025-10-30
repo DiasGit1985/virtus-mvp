@@ -1,0 +1,20 @@
+{
+  "buildCommand": "pnpm install && pnpm build",
+  "outputDirectory": "dist",
+  "framework": "vite",
+  "nodeVersion": "22.x",
+  "env": {
+    "VITE_APP_ID": "@VITE_APP_ID",
+    "VITE_OAUTH_PORTAL_URL": "@VITE_OAUTH_PORTAL_URL",
+    "VITE_APP_TITLE": "@VITE_APP_TITLE",
+    "VITE_APP_LOGO": "@VITE_APP_LOGO",
+    "VITE_ANALYTICS_ENDPOINT": "@VITE_ANALYTICS_ENDPOINT",
+    "VITE_ANALYTICS_WEBSITE_ID": "@VITE_ANALYTICS_WEBSITE_ID",
+    "OAUTH_SERVER_URL": "@OAUTH_SERVER_URL",
+    "DATABASE_URL": "@DATABASE_URL",
+    "JWT_SECRET": "@JWT_SECRET",
+    "SUPABASE_URL": "@SUPABASE_URL",
+    "SUPABASE_KEY": "@SUPABASE_KEY"
+  }
+}
+
